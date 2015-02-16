@@ -1,0 +1,28 @@
+local channel = 25565
+side = peripheral.find("modem")
+modem = peripheral.wrap(side)
+modem.open(channel)
+
+local register = function()
+  if fs.exists(shell.resolve("users/"..data.user)) then
+    handleError("Already registered!")
+  end
+end
+
+while true do
+  local evt,side,chan,rep,msg = os.pullEventRaw("modem_message")
+  print("[MESSAGE] Raw message: "..msg)
+  local data = textutils.unserialize(msg)
+  for k,v in pairs(data) do
+    if type(v) == "string" then
+      print("[DATA]Key: "..k.." Value: \""..v.."\" of type \"string\"")
+    else
+      print("[DATA]Key: "..k.." Value: "..v.." of type \""..type(v).."\"")
+    end
+  end
+  if not _G[data.call] then
+    print("[ERROR]No function match")
+  else
+    _G[data.call]()
+  end
+end
